@@ -1,0 +1,10 @@
+package com.makeeasy.retrofitfirst;
+
+import android.telecom.Call;
+
+import java.util.List;
+
+public interface myapi {
+    @GET("posts")
+    Call<List<modelclass>> getmodels();
+}
