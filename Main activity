@@ -1,6 +1,7 @@
 package com.makeeasy.retrofitfirst;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,43 +9,73 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity{
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class MainActivity extends AppCompatActivity {
+
     TextView tv;
-    String url="https://jsonplaceholder.typicode";
+
+    // Base URL must end with '/'
+    String url = "https://jsonplaceholder.typicode.com/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        tv = findViewById(R.id.tv);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            v.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+            );
             return insets;
-
-
         });
 
-            Retrofit retrofit=new Retrofit.builder()
-                    .baseUrl(url)
-                    .addConverterFactory(GsonConerterFactory.create())
-                    .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(url)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-            myapi api=retrofit.create(myapi.class);
+        MyApi api = retrofit.create(MyApi.class);
 
-            Call<List<Modelclass>> call=api.geymodels();
+        Call<List<modelclass>> call = api.getmodels();
 
-            call.enqueue(new callback<List<modelclass>>){
-                @override
-                public void onResponse(Call<List<modelcalss>>call, Response<List<model>> response){
-                List<modelcalss> data=response.body();
-                for(int i=0;i<data.size();i++)
-                    tv.append("SL No:"+data.get(i).getId()+" \n Title :"+data.get(i).getTitle()+"\n\n\n");
+        call.enqueue(new Callback<List<modelclass>>() {
+            @Override
+            public void onResponse(Call<List<modelclass>> call,
+                                   Response<List<modelclass>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    List<modelclass> data = response.body();
+
+                    for (int i = 0; i < data.size(); i++) {
+
+                        tv.append(
+                                "SL No: " + data.get(i).getId()
+                                        + "\nTitle: " + data.get(i).getTitle()
+                                        + "\n\n"
+                        );
+                    }
                 }
-                @override
-                public void onFailure(Call<List<nodelclass>> call,Throwable t){
+            }
 
-                }
-            });
+            @Override
+            public void onFailure(Call<List<modelclass>> call, Throwable t) {
+                tv.setText("Error: " + t.getMessage());
+            }
+        });
     }
 }
